@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4f46e5">
-    <meta name="description" content="Secure Class Appreciation Portal | v2.4.0-stable">
+    <meta name="description" content="Secure Class Appreciation Portal | v2.6.0-Enterprise">
+    <meta name="application-name" content="Anomiac Portal">
     <title>The Appreciation Envelope | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,12 +26,12 @@
             --bg-grad-start: #f8fafc;
             --bg-grad-end: #e2e8f0;
             --glass-border: rgba(255, 255, 255, 0.6);
-            --glass-surface: rgba(255, 255, 255, 0.75);
+            --glass-surface: rgba(255, 255, 255, 0.85);
             --shadow-elevation-1: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             --shadow-elevation-2: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- GLOBAL RESETS --- */
+        /* --- GLOBAL RESET & BASE --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -63,7 +64,7 @@
             100% { background-position: 100% 50%; }
         }
 
-        /* --- GLASSMORPHISM COMPONENT --- */
+        /* --- COMPONENT: GLASS CARD --- */
         .glass-card {
             background: var(--glass-surface);
             backdrop-filter: blur(24px) saturate(180%);
@@ -74,7 +75,7 @@
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        /* --- INTERACTION STATES --- */
+        /* --- COMPONENT: INPUT FIELDS --- */
         .input-field {
             background: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(203, 213, 225, 0.8);
@@ -87,6 +88,7 @@
             transform: translateY(-2px);
         }
 
+        /* --- COMPONENT: ACTION BUTTONS --- */
         .btn-action {
             position: relative; overflow: hidden;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -101,7 +103,7 @@
         }
         .btn-action:hover::after { opacity: 1; }
 
-        /* --- STATIONERY THEMES --- */
+        /* --- VISUAL STATIONERY THEMES --- */
         .note-sticky {
             background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
             font-family: 'Caveat', cursive; font-size: 1.4rem; color: #422006;
@@ -132,17 +134,18 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* --- UTILS --- */
+        /* --- UTILITIES --- */
         .rtl { direction: rtl; text-align: right; }
         .ltr { direction: ltr; text-align: left; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* --- TOAST --- */
+        /* --- NOTIFICATION TOAST (CRITICAL: pointer-events-none) --- */
         #sys-toast {
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform: translate(-50%, 100px); opacity: 0;
+            pointer-events: none; /* Allows clicks to pass through when invisible */
         }
-        #sys-toast.active { transform: translate(-50%, -20px); opacity: 1; }
+        #sys-toast.active { transform: translate(-50%, -20px); opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4">
@@ -159,7 +162,7 @@
 
     <div id="sys-toast" class="fixed bottom-0 left-1/2 z-50 flex items-center gap-3 px-6 py-3 bg-slate-800 text-white rounded-full shadow-2xl">
         <span class="text-xl">🔔</span>
-        <span id="toast-text" class="text-sm font-semibold pr-2">Notification</span>
+        <span id="toast-text" class="text-sm font-semibold pr-2">System Notification</span>
     </div>
 
     <div class="fixed bottom-4 w-full text-center pointer-events-none z-0 opacity-60">
@@ -171,42 +174,42 @@
 
     <script>
         /**
-         * ANOMIAC CLASS PORTAL - ENTERPRISE EDITION
-         * v2.4.0 Build 2025.12.31
-         * * Architecture:
-         * 1. CONFIG: Constants and Environment Variables
-         * 2. DB: Supabase Connection Layer
-         * 3. STATE: Reactive State Management
-         * 4. I18N: Internationalization Engine
-         * 5. UI: Rendering & Visual Logic
-         * 6. ACTIONS: Business Logic & Event Handlers
+         * ANOMIAC PORTAL - ENTERPRISE ARCHITECTURE
+         * v2.6.0 Build 2025.12.31
+         * * MODULE MAP:
+         * 1. Config  : Environment variables & Constants
+         * 2. DB      : Supabase Connection Layer
+         * 3. State   : Reactive Data Store
+         * 4. I18n    : Internationalization Engine
+         * 5. UI      : Rendering & Visual Logic
+         * 6. Actions : Business Logic & Event Handlers
          */
 
         // --- MODULE 1: CONFIGURATION ---
         const Config = {
             SUPABASE_URL: 'https://ijgtdeffemmvuezkkfri.supabase.co',
             SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMTI5MzEsImV4cCI6MjA4MjU4ODkzMX0.x-nO59Smnq2Sk-Q_rVOM3oPuVmur5nTpgwZntJJEFxY',
-            VERSION: '2.4.0',
+            VERSION: '2.6.0',
             ANIMATION_SPEED: 400
         };
 
         // --- MODULE 2: DATABASE LAYER ---
         const DB = window.supabase.createClient(Config.SUPABASE_URL, Config.SUPABASE_KEY);
         
-        // Console Boot Log (Looks Professional)
-        console.log(`%c ANOMIAC PORTAL %c v${Config.VERSION} `, 'background:#4f46e5; color:white; padding:4px; border-radius:4px;', 'color:#4f46e5;');
-        console.log('System Status: Online. RLS: Active.');
+        // System Boot Log
+        console.log(`%c ANOMIAC ENTERPRISE %c v${Config.VERSION} `, 'background:#4f46e5; color:white; padding:4px; border-radius:4px;', 'color:#4f46e5;');
+        console.log('System Status: Online. RLS: Active. Realtime: Enabled.');
 
         // --- MODULE 3: STATE MANAGEMENT ---
         const State = {
             view: 'welcome', // 'welcome', 'login', 'dashboard', 'send'
             lang: 'en',      // 'en', 'fr', 'ar'
-            user: null,      // Current User Object
+            user: null,      // Current Logged In User
             cache: {
-                students: [],
-                messages: []
+                students: [], // Cached list of classmates
+                messages: []  // Cached list of received messages
             },
-            subscriptions: null // Realtime socket
+            subscriptions: null // Realtime socket reference
         };
 
         // --- MODULE 4: INTERNATIONALIZATION (I18N) ---
@@ -233,7 +236,8 @@
                 toast_new: "New encrypted message received.",
                 err_name: "User not found in registry.",
                 err_pass: "Authentication failed.",
-                change: "Modify"
+                change: "Modify",
+                loading: "Loading Database..."
             },
             fr: {
                 title: "Un seul mot peut changer une vie",
@@ -257,7 +261,8 @@
                 toast_new: "Nouveau message chiffré reçu.",
                 err_name: "Utilisateur introuvable.",
                 err_pass: "Échec de l'authentification.",
-                change: "Modifier"
+                change: "Modifier",
+                loading: "Chargement..."
             },
             ar: {
                 title: "كلمة واحدة قد تغير حياة بأكملها",
@@ -281,7 +286,8 @@
                 toast_new: "وصلتك رسالة مشفرة جديدة.",
                 err_name: "الاسم غير موجود في السجل.",
                 err_pass: "خطأ في كلمة المرور.",
-                change: "تغيير"
+                change: "تغيير",
+                loading: "جار التحميل..."
             }
         };
 
@@ -295,14 +301,14 @@
             // Helper: Determine Direction
             dir: () => State.lang === 'ar' ? 'rtl' : 'ltr',
             
-            // Helper: Randomize Paper Style
+            // Helper: Randomize Paper Style for Organic Feel
             getPaperStyle: (idx) => {
                 const types = ['note-sticky', 'note-card', 'note-elegant'];
                 const rot = ((idx * 17) % 5) - 2; // Pseudo-random rotation -2 to +2
                 return { class: types[idx % types.length], rot: `rotate(${rot}deg)` };
             },
 
-            // RENDER: Welcome Screen
+            // SCREEN 1: Welcome
             renderWelcome: () => {
                 const t = UI.t();
                 UI.root.innerHTML = `
@@ -325,7 +331,7 @@
                 `;
             },
 
-            // RENDER: Login Screen
+            // SCREEN 2: Login
             renderLogin: () => {
                 const t = UI.t();
                 UI.root.innerHTML = `
@@ -350,7 +356,7 @@
                 `;
             },
 
-            // RENDER: Dashboard
+            // SCREEN 3: Dashboard (Messages)
             renderDashboard: () => {
                 const t = UI.t();
                 const msgs = State.cache.messages;
@@ -393,7 +399,7 @@
                             <button onclick="Actions.generatePDF()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2">
                                 <span>📄</span> ${t.act_pdf}
                             </button>
-                            <button onclick="Actions.loadStudents(); Actions.nav('send')" class="flex-[1.5] py-3 btn-action text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+                            <button id="btn-compose-trigger" onclick="Actions.openCompose()" class="flex-[1.5] py-3 btn-action text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
                                 <span>✍️</span> ${t.act_write}
                             </button>
                         </div>
@@ -401,11 +407,11 @@
                 `;
             },
 
-            // RENDER: Send Message
+            // SCREEN 4: Send Message
             renderSend: () => {
                 const t = UI.t();
-                // Filter Logic
-                const term = State.searchQuery.toLowerCase();
+                // Filter Logic for Recipient Search
+                const term = (State.searchQuery || '').toLowerCase();
                 const filtered = State.cache.students.filter(s => 
                     s.Full_name.toLowerCase().includes(term) && 
                     s.Full_name !== State.user.Full_name
@@ -461,10 +467,12 @@
         // --- MODULE 6: BUSINESS LOGIC (ACTIONS) ---
         const Actions = {
             init: () => {
+                // Initialize Application
                 UI.renderWelcome();
             },
 
             nav: (view) => {
+                // Navigation Router
                 State.view = view;
                 switch(view) {
                     case 'welcome': UI.renderWelcome(); break;
@@ -476,7 +484,27 @@
 
             setLang: (l) => {
                 State.lang = l;
-                UI.renderWelcome(); // Re-render current view
+                UI.renderWelcome(); // Re-render to apply language
+            },
+
+            // --- BUG FIX: COMPOSE BUTTON LOGIC ---
+            openCompose: async () => {
+                // 1. Provide visual feedback
+                const btn = document.getElementById('btn-compose-trigger');
+                if(btn) btn.innerText = UI.t().loading;
+
+                try {
+                    // 2. Load Student List IF not cached
+                    if (!State.cache.students.length) {
+                        const { data } = await DB.from('Students').select('Full_name');
+                        State.cache.students = data || [];
+                    }
+                    // 3. Switch View
+                    Actions.nav('send');
+                } catch (e) {
+                    console.error("Critical Load Error:", e);
+                    if(btn) btn.innerText = "Error";
+                }
             },
 
             login: async () => {
@@ -486,7 +514,7 @@
                 if (!name || !pass) return alert("Credentials required.");
 
                 try {
-                    // Smart Search (Flexible Spaces)
+                    // Flexible Search Algorithm (Spaces -> Wildcards)
                     const flexName = name.split(/\s+/).join('%');
                     const { data, error } = await DB
                         .from('Students')
@@ -498,7 +526,7 @@
 
                     const user = data[0];
 
-                    // Password Handling
+                    // Password Handling Protocol
                     if (!user.Password) {
                         // First-time Setup
                         await DB.from('Students').update({ Password: pass }).eq('id', user.id);
@@ -506,7 +534,7 @@
                         throw new Error('Invalid_Pass');
                     }
 
-                    // Success Sequence
+                    // Success Protocol
                     State.user = user;
                     await Actions.syncMessages();
                     Actions.initRealtime();
@@ -520,7 +548,7 @@
             },
 
             syncMessages: async () => {
-                // Security: Fetch only content, exclude sensitive metadata
+                // Secure Fetch: Only content & timestamp (No Sender ID)
                 const { data } = await DB
                     .from('messages')
                     .select('content, created_at')
@@ -530,17 +558,11 @@
                 State.cache.messages = data || [];
             },
 
-            loadStudents: async () => {
-                if (State.cache.students.length) return;
-                const { data } = await DB.from('Students').select('Full_name');
-                State.cache.students = data || [];
-            },
-
             updateSearch: (val) => {
                 State.searchQuery = val;
                 window.selectedRec = null;
                 UI.renderSend();
-                // Maintain Focus Hack
+                // Maintain Input Focus
                 const el = document.querySelector('input');
                 if (el) { el.value = val; el.focus(); }
             },
@@ -563,11 +585,11 @@
                 const { error } = await DB.from('messages').insert(payload);
 
                 if (!error) {
-                    // Visual Reward
+                    // Reward Feedback
                     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#f43f5e', '#fef08a'] });
                     UI.toast(UI.t().toast_sent);
                     
-                    // Reset
+                    // Reset View
                     window.selectedRec = null; 
                     State.searchQuery = '';
                     Actions.nav('dashboard');
@@ -585,7 +607,7 @@
                         table: 'messages', 
                         filter: `recipient_name=eq.${State.user.Full_name}` 
                     }, () => {
-                        // Hot Reload
+                        // Live Reload
                         Actions.syncMessages().then(() => {
                             if (State.view === 'dashboard') UI.renderDashboard();
                             UI.toast(UI.t().toast_new);
@@ -630,9 +652,8 @@
 
         // --- SYSTEM BOOT ---
         window.onload = Actions.init;
-        // Global Exposure for HTML Event Handlers
-        window.Actions = Actions; 
+        window.Actions = Actions; // Expose to HTML
 
     </script>
 </body>
-</html> 
+</html>
