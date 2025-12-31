@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Appreciation Envelope | Class of 2025</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -10,116 +10,167 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Caveat:wght@500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
+        /* --- CORE PHYSICS & FEEL --- */
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
+            background-color: #f8fafc;
+            color: #0f172a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        .glass { 
-            background: rgba(255, 255, 255, 0.92); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+
+        /* Animated Aurora Background */
+        .aurora-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: 200% 200%;
+            animation: aurora 15s ease infinite alternate;
+            z-index: -1;
         }
+        .aurora-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(80px); /* Heavy blur for depth */
+            z-index: -1;
+        }
+
+        @keyframes aurora {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Premium Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 10px 15px -3px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset; /* Inner glow */
+        }
+
+        /* Animations */
+        .animate-enter { animation: enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+
+        @keyframes enter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Input Fields */
+        .input-premium {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(203, 213, 225, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;
+        }
+        .input-premium:focus {
+            background: #fff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            box-shadow: 
+                0 4px 6px -1px rgba(79, 70, 229, 0.2),
+                0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:hover { box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4); filter: brightness(1.1); }
+
+        /* --- STATIONERY STYLES (The "Organic" Look) --- */
+        
+        .paper-base {
+            position: relative;
+            transition: transform 0.3s ease;
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.05),
+                0 2px 2px rgba(0,0,0,0.05),
+                0 4px 4px rgba(0,0,0,0.05),
+                0 8px 8px rgba(0,0,0,0.05); /* Soft, layered shadow */
+        }
+        .paper-base:hover { transform: scale(1.02) rotate(0deg) !important; z-index: 10; }
+
+        /* 1. The Sticky Note */
+        .style-sticky {
+            background: #fef9c3;
+            background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+            font-family: 'Caveat', cursive;
+            font-size: 1.35rem;
+            color: #422006;
+            border-bottom-right-radius: 40px 10px;
+        }
+        
+        /* 2. The Index Card */
+        .style-card {
+            background: #fff;
+            background-image: radial-gradient(#94a3b8 0.5px, transparent 0.5px);
+            background-size: 12px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #334155;
+            border-top: 4px solid #f43f5e;
+        }
+
+        /* 3. The Classic Letter */
+        .style-letter {
+            background: #fafaf9;
+            border: 1px solid #e7e5e4;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #1c1917;
+            text-align: center;
+            padding-left: 2rem; padding-right: 2rem;
+        }
+        .style-letter::before { content: '"'; font-size: 3rem; color: #d6d3d1; position: absolute; top: -10px; left: 10px; opacity: 0.5; }
+
+        /* 4. The Modern Note */
+        .style-modern {
+            background: #fff;
+            border-left: 6px solid #6366f1;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        /* RTL Handling */
         .rtl { direction: rtl; text-align: right; }
         .ltr { direction: ltr; text-align: left; }
-        
-        /* Smooth Animations */
-        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* --- VISUAL STATIONERY STYLES --- */
-        
-        /* 1. Yellow Sticky Note */
-        .paper-sticky {
-            background-color: #fef08a; /* Yellow-200 */
-            color: #422006;
-            font-family: 'Caveat', cursive;
-            font-size: 1.25rem;
-            transform: rotate(-1deg);
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-            border-bottom-right-radius: 40px 5px;
-        }
-
-        /* 2. Lined Notebook Page */
-        .paper-lined {
-            background-color: #fff;
-            background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 100% 1.5rem; /* Line height */
-            color: #334155;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            border-left: 4px solid #f43f5e; /* Margin line */
-            line-height: 1.5rem;
-            padding-top: 0.2rem;
-        }
-
-        /* 3. Elegant Card */
-        .paper-elegant {
-            background-color: #fafaf9; /* Warm grey */
-            color: #1c1917;
-            font-family: 'Playfair Display', serif;
-            border: 1px solid #d6d3d1;
-            border-radius: 4px;
-            text-align: center;
-            font-style: italic;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* 4. Minimalist Tech */
-        .paper-minimal {
-            background-color: #fff;
-            border-left: 4px solid #6366f1; /* Indigo */
-            color: #1e293b;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        /* Toast Notification */
-        #toast-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-            pointer-events: none;
-        }
-        .toast {
-            background: #1e293b;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            transform: translateY(20px);
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 text-slate-800">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div id="app" class="w-full max-w-md relative z-10"></div>
+    <div class="aurora-bg"></div>
+    <div class="aurora-overlay"></div>
 
-    <div id="toast-container">
-        <div id="toast" class="toast">
-            <span class="text-xl">💌</span> <span id="toast-msg">New message received!</span>
-        </div>
+    <div id="app" class="w-full max-w-md relative z-10 transition-all duration-500 ease-in-out"></div>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-500 z-50 flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl pointer-events-none">
+        <span class="text-xl animate-bounce">💌</span>
+        <span id="toast-msg" class="text-sm font-semibold tracking-wide">New message received</span>
     </div>
 
-    <div class="fixed bottom-4 text-center w-full max-w-md px-6 pointer-events-none opacity-60 z-0">
-        <p class="text-[10px] text-slate-400 uppercase tracking-widest" id="privacyText">
-            🔒 100% Anonymous • Zero-Knowledge Protocol
-        </p>
+    <div class="fixed bottom-3 w-full text-center pointer-events-none z-0">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/20">
+            <svg class="w-3 h-3 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+            <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">End-to-End Anonymous</span>
+        </div>
     </div>
 
     <script>
@@ -129,82 +180,68 @@
         
         const db = window.supabase.createClient(SB_URL, SB_KEY);
 
-        // --- 4. STATE & TRANSLATIONS ---
-        let state = {
-            view: 'welcome',
-            lang: 'en',
-            user: null,
-            students: [],
-            messages: [],
-            searchQuery: '',
-            realtimeSub: null
-        };
+        // --- 4. STATE & CONTENT ---
+        let state = { view: 'welcome', lang: 'en', user: null, students: [], messages: [], searchQuery: '', realtimeSub: null };
 
         const content = {
             en: {
                 maxwellTitle: "A Single Word Can Change a Life",
-                maxwellBody: "Years ago, a teacher asked her class to write down the best quality of every other student. Decades later, a soldier killed in war was found with that folded paper in his pocket. It was his most prized possession. Today, we recreate that list.",
-                btnStart: "Enter Portal",
+                maxwellBody: "Decades ago, a simple list of compliments found in a soldier's pocket revealed the immense power of appreciation. Today, we recreate that list.",
+                btnStart: "Begin Experience",
                 loginTitle: "Identify Yourself",
                 phName: "Full Name (e.g. Achour Yacine)",
-                phPass: "Secret Password",
-                btnLogin: "Access My Envelope",
-                welcome: "Hello,",
-                empty: "Your envelope is waiting for its first letter.",
-                btnSend: "Send Appreciation",
-                btnDl: "Download Certificate (PDF)",
+                phPass: "Create or Enter Password",
+                btnLogin: "Unlock Envelope",
+                welcome: "Welcome back,",
+                emptyTitle: "Your Envelope is Empty",
+                emptyBody: "But not for long. Check back as others write to you.",
+                btnSend: "Write an Appreciation",
+                btnDl: "Export Certificate",
                 writeTitle: "Who inspires you?",
-                phSearch: "Search for a classmate...",
-                phMsg: "Write something genuine. What do you admire about them? A small compliment can mean the world.",
+                phSearch: "Search classmate...",
+                phMsg: "What do you admire about them? Be genuine, be kind.",
                 btnSubmit: "Send Anonymously",
-                privacy: "🔒 Strictly Anonymous: Even the administrators cannot see who sent a message. Be kind, be real.",
                 alertSent: "Your kindness has been delivered.",
-                alertPassSet: "Password secured! Don't forget it.",
-                alertPassErr: "Incorrect password.",
                 newMsg: "You have a new letter! 💌"
             },
             fr: {
                 maxwellTitle: "Un seul mot peut changer une vie",
-                maxwellBody: "Il y a des années, une enseignante a demandé à sa classe d'écrire la meilleure qualité de chaque élève. Des décennies plus tard, on a retrouvé cette liste dans la poche d'un soldat tombé au combat. C'était son bien le plus précieux. Aujourd'hui, nous recréons cette liste.",
-                btnStart: "Entrer",
+                maxwellBody: "Il y a des décennies, une simple liste de compliments trouvée dans la poche d'un soldat a révélé l'immense pouvoir de la reconnaissance. Aujourd'hui, nous recréons cette liste.",
+                btnStart: "Commencer l'expérience",
                 loginTitle: "Identifiez-vous",
                 phName: "Nom complet (ex. Achour Yacine)",
-                phPass: "Mot de passe secret",
-                btnLogin: "Accéder à mon enveloppe",
-                welcome: "Bonjour,",
-                empty: "Votre enveloppe attend sa première lettre.",
-                btnSend: "Envoyer de la reconnaissance",
-                btnDl: "Télécharger Certificat (PDF)",
+                phPass: "Créer ou entrer mot de passe",
+                btnLogin: "Ouvrir l'enveloppe",
+                welcome: "Bon retour,",
+                emptyTitle: "Votre enveloppe est vide",
+                emptyBody: "Mais pas pour longtemps. Revenez voir bientôt.",
+                btnSend: "Écrire une reconnaissance",
+                btnDl: "Exporter le certificat",
                 writeTitle: "Qui vous inspire ?",
                 phSearch: "Chercher un camarade...",
-                phMsg: "Écrivez quelque chose de sincère. Qu'admirez-vous chez cette personne ?",
-                btnSubmit: "Envoyer Anonymement",
-                privacy: "🔒 Strictement Anonyme : Même les administrateurs ne peuvent pas voir l'expéditeur.",
+                phMsg: "Qu'admirez-vous chez cette personne ? Soyez sincère.",
+                btnSubmit: "Envoyer anonymement",
                 alertSent: "Votre message a été livré.",
-                alertPassSet: "Mot de passe sécurisé !",
-                alertPassErr: "Mot de passe incorrect.",
                 newMsg: "Nouveau message reçu ! 💌"
             },
             ar: {
                 maxwellTitle: "كلمة واحدة قد تغير حياة بأكملها",
-                maxwellBody: "ذات مرة، طلبت معلمة من طلابها أن يكتبوا أجمل صفة في كل زميل لهم. بعد سنوات، عُثر على تلك الورقة في جيب أحد الطلاب الذي توفي في الحرب، وكانت أغلى ما يملك. اليوم، نحن نعيد إحياء تلك اللحظة.",
+                maxwellBody: "منذ عقود، كشفت ورقة بسيطة وُجدت في جيب جندي عن القوة الهائلة للتقدير. اليوم، نحن نعيد إحياء تلك اللحظة.",
                 btnStart: "ابدأ الرحلة",
                 loginTitle: "تسجيل الدخول",
                 phName: "الاسم الكامل (مثال: عاشور ياسين)",
                 phPass: "كلمة السر",
                 btnLogin: "فتح مغلفي الخاص",
                 welcome: "أهلاً بك،",
-                empty: "مغلفك ينتظر أول رسالة تقدير.",
+                emptyTitle: "مغلفك فارغ حالياً",
+                emptyBody: "ولكن ليس لوقت طويل. عد لاحقاً لتجد رسائل التقدير.",
                 btnSend: "أرسل كلمة طيبة",
-                btnDl: "تحميل الشهادة (PDF)",
+                btnDl: "تحميل الشهادة",
                 writeTitle: "من يستحق التقدير؟",
                 phSearch: "ابحث عن اسم...",
-                phMsg: "أكتب شيئاً نابعاً من القلب. ما الذي يعجبك في هذا الشخص؟ الكلمة الطيبة صدقة.",
+                phMsg: "ما الذي يعجبك في هذا الشخص؟ الكلمة الطيبة صدقة.",
                 btnSubmit: "إرسال بسرية تامة",
-                privacy: "🔒 سرية مطلقة: حتى المسؤولين عن الموقع لا يمكنهم معرفة هوية المرسل. كن صادقاً ولطيفاً.",
                 alertSent: "تم إيصال رسالتك بنجاح.",
-                alertPassSet: "تم حفظ كلمة السر بنجاح!",
-                alertPassErr: "كلمة السر غير صحيحة.",
                 newMsg: "وصلتك رسالة جديدة! 💌"
             }
         };
@@ -213,11 +250,16 @@
         function setView(v) { state.view = v; render(); }
         function setLang(l) { state.lang = l; render(); }
 
-        // Helper: Get Random Stationery Class
-        function getPaperStyle(index) {
-            const styles = ['paper-sticky', 'paper-lined', 'paper-elegant', 'paper-minimal'];
-            // Use index to make it deterministic (so it doesn't change on re-render)
+        function getRandomStyle(index) {
+            const styles = ['style-sticky', 'style-card', 'style-letter', 'style-modern'];
             return styles[index % styles.length];
+        }
+
+        // Add organic rotation to notes based on index
+        function getRotation(index) {
+            // Predictable randomness based on index
+            const rot = ((index * 13) % 5) - 2; // Returns number between -2 and 2
+            return `transform: rotate(${rot}deg);`;
         }
 
         function render() {
@@ -226,24 +268,23 @@
             const dir = state.lang === 'ar' ? 'rtl' : 'ltr';
             const font = state.lang === 'ar' ? "font-family: 'Plus Jakarta Sans', sans-serif;" : "";
 
-            document.getElementById('privacyText').innerText = t.privacy;
-
             // 1. WELCOME
             if (state.view === 'welcome') {
                 app.innerHTML = `
-                    <div class="glass p-8 rounded-[2rem] shadow-2xl space-y-8 ${dir} fade-in" style="${font}">
-                        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <div class="glass-panel p-8 rounded-[2.5rem] text-center space-y-8 animate-enter ${dir}" style="${font}">
+                        <div class="w-20 h-20 bg-gradient-to-tr from-indigo-100 to-white rounded-full flex items-center justify-center mx-auto shadow-xl ring-4 ring-white/50">
+                            <span class="text-4xl">✉️</span>
                         </div>
-                        <div class="text-center space-y-4">
-                            <h1 class="text-2xl font-bold text-slate-900 leading-tight">${t.maxwellTitle}</h1>
-                            <p class="text-slate-600 text-sm leading-relaxed">${t.maxwellBody}</p>
+                        <div class="space-y-4">
+                            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">${t.maxwellTitle}</h1>
+                            <p class="text-slate-600 text-sm leading-relaxed font-medium mx-auto max-w-xs">${t.maxwellBody}</p>
                         </div>
-                        <button onclick="setView('login')" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transform transition active:scale-95">${t.btnStart}</button>
-                        <div class="flex justify-center gap-6 pt-2">
-                            <button onclick="setLang('en')" class="text-xs font-bold tracking-wider ${state.lang==='en'?'text-indigo-600':'text-slate-400'}">EN</button>
-                            <button onclick="setLang('fr')" class="text-xs font-bold tracking-wider ${state.lang==='fr'?'text-indigo-600':'text-slate-400'}">FR</button>
-                            <button onclick="setLang('ar')" class="text-xs font-bold tracking-wider ${state.lang==='ar'?'text-indigo-600':'text-slate-400'}">عربي</button>
+                        <button onclick="setView('login')" class="w-full py-4 btn-primary text-white font-bold rounded-2xl text-lg tracking-wide">${t.btnStart}</button>
+                        
+                        <div class="flex justify-center gap-1 bg-slate-100/50 p-1.5 rounded-xl w-max mx-auto">
+                            ${['en','fr','ar'].map(l => `
+                                <button onclick="setLang('${l}')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${state.lang===l ? 'bg-white shadow text-indigo-600' : 'text-slate-400 hover:text-slate-600'}">${l.toUpperCase()}</button>
+                            `).join('')}
                         </div>
                     </div>
                 `;
@@ -252,108 +293,115 @@
             // 2. LOGIN
             else if (state.view === 'login') {
                 app.innerHTML = `
-                    <div class="glass p-8 rounded-[2rem] shadow-2xl space-y-6 ${dir} fade-in">
+                    <div class="glass-panel p-8 rounded-[2.5rem] space-y-8 animate-enter ${dir}">
                         <div class="text-center">
-                            <h2 class="text-xl font-bold text-slate-800">${t.loginTitle}</h2>
+                            <h2 class="text-2xl font-bold text-slate-900">${t.loginTitle}</h2>
+                            <p class="text-slate-400 text-xs uppercase tracking-widest font-bold mt-2">Class of 2025</p>
                         </div>
-                        <div class="space-y-3">
-                            <input id="nameInput" type="text" placeholder="${t.phName}" class="w-full p-4 bg-white/50 border border-white rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition text-slate-800 placeholder-slate-400">
-                            <input id="passInput" type="password" placeholder="${t.phPass}" class="w-full p-4 bg-white/50 border border-white rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition text-slate-800 placeholder-slate-400">
+                        <div class="space-y-4">
+                            <div class="group">
+                                <input id="nameInput" type="text" placeholder="${t.phName}" class="w-full p-4 rounded-2xl input-premium outline-none text-slate-800 placeholder-slate-400 font-medium text-lg">
+                            </div>
+                            <div class="group">
+                                <input id="passInput" type="password" placeholder="${t.phPass}" class="w-full p-4 rounded-2xl input-premium outline-none text-slate-800 placeholder-slate-400 font-medium text-lg">
+                            </div>
                         </div>
-                        <button onclick="handleLogin()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transform transition active:scale-95">${t.btnLogin}</button>
-                        <button onclick="setView('welcome')" class="w-full text-center text-xs text-slate-400 hover:text-slate-600">Back</button>
+                        <button onclick="handleLogin()" class="w-full py-4 btn-primary text-white font-bold rounded-2xl text-lg shadow-lg">${t.btnLogin}</button>
+                        <button onclick="setView('welcome')" class="w-full text-center text-xs text-slate-400 hover:text-slate-600 font-bold tracking-wider">CANCEL</button>
                     </div>
                 `;
             }
 
             // 3. DASHBOARD
             else if (state.view === 'dashboard') {
-                // Generate Messages with Stationery Styles
                 const msgList = state.messages.map((m, i) => `
-                    <div class="p-5 mb-4 rounded-xl ${getPaperStyle(i)} pop-in" style="animation-delay: ${i * 0.1}s">
-                        <p class="text-sm leading-relaxed">"${m.content}"</p>
+                    <div class="p-6 mb-6 rounded-xl shadow-sm paper-base ${getRandomStyle(i)} animate-enter" style="animation-delay: ${i * 0.1}s; ${getRotation(i)}">
+                        <p class="leading-relaxed whitespace-pre-wrap">"${m.content}"</p>
                     </div>
                 `).join('');
 
                 app.innerHTML = `
-                    <div class="space-y-4 ${dir} fade-in w-full">
-                        <div class="flex justify-between items-center px-4">
-                            <h2 class="text-lg font-bold text-slate-900">${t.welcome} ${state.user.Full_name.split(' ')[0]}</h2>
-                            <button onclick="location.reload()" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-400 rounded-full hover:bg-red-100 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <div class="space-y-6 ${dir} animate-enter w-full pb-24">
+                        <div class="flex justify-between items-end px-2">
+                            <div>
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">${t.welcome}</p>
+                                <h2 class="text-2xl font-extrabold text-slate-900">${state.user.Full_name.split(' ')[0]}</h2>
+                            </div>
+                            <button onclick="location.reload()" class="bg-white/80 p-2 rounded-full text-slate-400 hover:text-red-500 transition shadow-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                             </button>
                         </div>
 
-                        <div class="glass p-1 rounded-[2.5rem] min-h-[400px] shadow-xl flex flex-col relative overflow-hidden">
-                            <div class="absolute inset-0 opacity-50 pointer-events-none" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;"></div>
-                            
-                            <div class="flex-1 overflow-y-auto p-6 relative z-10 pb-20">
-                                ${state.messages.length ? msgList : `
-                                    <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 space-y-4 opacity-70">
-                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 19v-8.93a2 2 0 01.89-1.664l7.171-4.161a2 2 0 011.878 0l7.171 4.161a2 2 0 01.89 1.664V19a2 2 0 01-2 2h-14a2 2 0 01-2-2z"></path></svg>
-                                        <p class="text-sm font-medium max-w-[200px]">${t.empty}</p>
-                                    </div>
-                                `}
-                            </div>
-                            
-                            <div class="absolute bottom-0 w-full p-4 space-y-3 bg-white/90 backdrop-blur-md rounded-b-[2.5rem] border-t border-slate-100 z-20">
-                                <button onclick="generatePDF()" class="w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    ${t.btnDl}
-                                </button>
-                                <button onclick="loadStudents(); setView('send')" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                                    ${t.btnSend}
-                                </button>
-                            </div>
+                        <div class="relative min-h-[50vh]">
+                            ${state.messages.length ? msgList : `
+                                <div class="glass-panel rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-[300px] border-dashed border-2 border-slate-300 bg-slate-50/50">
+                                    <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4 text-2xl animate-pulse">📭</div>
+                                    <h3 class="font-bold text-slate-700 text-lg">${t.emptyTitle}</h3>
+                                    <p class="text-slate-500 text-sm mt-2 max-w-[200px]">${t.emptyBody}</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="fixed bottom-8 left-0 w-full px-4 z-40">
+                        <div class="max-w-md mx-auto bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/50 flex gap-2">
+                            <button onclick="generatePDF()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                PDF
+                            </button>
+                            <button onclick="loadStudents(); setView('send')" class="flex-[2] py-3 btn-primary text-white font-bold rounded-xl text-sm shadow-lg flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                ${t.btnSend}
+                            </button>
                         </div>
                     </div>
                 `;
             }
 
-            // 4. SEND MESSAGE
+            // 4. SEND SCREEN
             else if (state.view === 'send') {
-                const filtered = state.students.filter(s => 
-                    s.Full_name.toLowerCase().includes(state.searchQuery.toLowerCase()) && 
-                    s.Full_name !== state.user.Full_name
-                );
-
+                const filtered = state.students.filter(s => s.Full_name.toLowerCase().includes(state.searchQuery.toLowerCase()) && s.Full_name !== state.user.Full_name);
+                
                 app.innerHTML = `
-                    <div class="glass p-6 rounded-[2rem] shadow-2xl space-y-4 ${dir} fade-in h-[85vh] flex flex-col">
-                        <div class="flex justify-between items-center pb-2">
-                            <h2 class="font-bold text-lg text-slate-800">${t.writeTitle}</h2>
-                            <button onclick="setView('dashboard')" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">&times;</button>
+                    <div class="glass-panel p-6 rounded-[2.5rem] h-[85vh] flex flex-col animate-enter ${dir} relative">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-bold text-xl text-slate-900">${t.writeTitle}</h2>
+                            <button onclick="setView('dashboard')" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
                         </div>
                         
-                        <div class="relative">
-                            <input oninput="updateSearch(this.value)" placeholder="${t.phSearch}" class="w-full p-4 pl-10 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <div class="relative mb-4 group">
+                            <input oninput="updateSearch(this.value)" placeholder="${t.phSearch}" class="w-full p-4 pl-12 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all group-hover:shadow-md">
+                            <svg class="w-5 h-5 text-slate-400 absolute left-4 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
 
-                        <div id="studentList" class="flex-1 overflow-y-auto space-y-2 pr-1 ${window.selectedRec ? 'hidden' : 'block'}">
+                        <div id="studentList" class="flex-1 overflow-y-auto space-y-2 pr-2 mb-4 ${window.selectedRec ? 'hidden' : 'block'} scroll-smooth">
                             ${filtered.map(s => `
-                                <div onclick="selectRecipient('${s.Full_name}')" class="p-3 bg-white border border-slate-100 rounded-xl cursor-pointer hover:bg-indigo-50 hover:border-indigo-100 transition flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">${s.Full_name.charAt(0)}</div>
-                                    <span class="text-sm font-medium text-slate-700">${s.Full_name}</span>
+                                <div onclick="selectRecipient('${s.Full_name}')" class="p-3 bg-white/60 border border-white hover:bg-indigo-50 hover:border-indigo-100 rounded-2xl cursor-pointer transition-all duration-200 flex items-center gap-4 group">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">${s.Full_name.charAt(0)}</div>
+                                    <span class="font-semibold text-slate-700">${s.Full_name}</span>
                                 </div>
                             `).join('')}
                         </div>
 
-                        <div class="${window.selectedRec ? 'block' : 'hidden'} p-4 bg-indigo-50 text-indigo-700 rounded-xl font-bold text-center text-sm border border-indigo-100 flex items-center justify-between">
-                            <span>To: ${window.selectedRec}</span>
-                            <button onclick="updateSearch('')" class="text-xs underline opacity-60">Change</button>
+                        <div class="${window.selectedRec ? 'flex' : 'hidden'} items-center justify-between p-4 bg-indigo-50 border border-indigo-100 rounded-2xl mb-4 animate-enter">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-xs">✓</div>
+                                <span class="font-bold text-indigo-900">${window.selectedRec}</span>
+                            </div>
+                            <button onclick="updateSearch('')" class="text-xs font-bold text-indigo-400 hover:text-indigo-600 uppercase tracking-wide">Change</button>
                         </div>
 
-                        <textarea id="msgContent" class="w-full h-40 p-4 bg-white border border-slate-200 rounded-2xl outline-none resize-none text-sm placeholder-slate-400 focus:border-indigo-500 transition" placeholder="${t.phMsg}"></textarea>
+                        <textarea id="msgContent" class="w-full h-40 p-5 bg-white border border-slate-200 rounded-2xl outline-none resize-none text-base placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner font-medium text-slate-700" placeholder="${t.phMsg}"></textarea>
                         
-                        <button onclick="sendMessage()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition">${t.btnSubmit}</button>
+                        <button onclick="sendMessage()" class="w-full py-4 mt-4 btn-primary text-white font-bold rounded-2xl text-lg shadow-xl">${t.btnSubmit}</button>
                     </div>
                 `;
             }
         }
 
-        // --- 6. LOGIC & SECURITY ---
-
+        // --- 6. CORE LOGIC ---
         async function handleLogin() {
             const rawName = document.getElementById('nameInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
@@ -362,33 +410,27 @@
             const flexibleName = rawName.split(/\s+/).join('%');
             const { data, error } = await db.from('Students').select('*').ilike('Full_name', `%${flexibleName}%`).limit(1);
 
-            if (error || !data || data.length === 0) return alert("Name not found. Please try again.");
+            if (error || !data || data.length === 0) return alert("Name not found.");
 
             const user = data[0];
             if (!user.Password) {
-                const { error: updateErr } = await db.from('Students').update({ Password: pass }).eq('id', user.id);
-                if(updateErr) return alert("Error setting password.");
-                alert(content[state.lang].alertPassSet);
+                await db.from('Students').update({ Password: pass }).eq('id', user.id);
             } else if (user.Password !== pass) {
-                return alert(content[state.lang].alertPassErr);
+                return alert("Incorrect password.");
             }
 
             state.user = user;
-            await loadMessages(); // Secure load
-            setupRealtime();      // Start listening for buzz
+            await loadMessages();
+            setupRealtime();
             setView('dashboard');
         }
 
-        // --- SECURE MESSAGE LOADING ---
         async function loadMessages() {
-            // CRITICAL: We explicitly SELECT ONLY 'content' and 'created_at'.
-            // We do NOT select 'sender_name'.
             const { data } = await db
                 .from('messages')
-                .select('content, created_at') 
+                .select('content, created_at')
                 .eq('recipient_name', state.user.Full_name)
                 .order('created_at', { ascending: false });
-                
             state.messages = data || [];
         }
 
@@ -399,24 +441,13 @@
             }
         }
 
-        // --- REALTIME BUZZ ---
         function setupRealtime() {
             if (state.realtimeSub) return;
-
             state.realtimeSub = db
                 .channel('public:messages')
-                .on('postgres_changes', { 
-                    event: 'INSERT', 
-                    schema: 'public', 
-                    table: 'messages', 
-                    filter: `recipient_name=eq.${state.user.Full_name}` 
-                }, (payload) => {
-                    // New message arrived!
-                    // Security: We ignore payload content to be safe and re-fetch properly.
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `recipient_name=eq.${state.user.Full_name}` }, () => {
                     loadMessages().then(() => {
-                        // If we are on dashboard, re-render to show new note
                         if (state.view === 'dashboard') render();
-                        // Show Notification Toast
                         showToast(content[state.lang].newMsg);
                     });
                 })
@@ -425,130 +456,66 @@
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-msg');
-            toastMsg.innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
         }
 
-        function updateSearch(val) { 
-            state.searchQuery = val; 
-            window.selectedRec = null; 
-            render(); 
-            const input = document.querySelector('input');
-            if(input) { input.value = val; input.focus(); } 
-        }
-
-        function selectRecipient(name) { window.selectedRec = name; render(); }
+        function updateSearch(val) { state.searchQuery = val; window.selectedRec = null; render(); const i = document.querySelector('input'); if(i){i.value=val;i.focus();} }
+        function selectRecipient(n) { window.selectedRec = n; render(); }
 
         async function sendMessage() {
-            const contentText = document.getElementById('msgContent').value.trim();
-            if(!window.selectedRec || !contentText) return alert("Please select a person and write a message.");
+            const txt = document.getElementById('msgContent').value.trim();
+            if(!window.selectedRec || !txt) return alert("Please write a message.");
             
-            const { error } = await db.from('messages').insert({ 
-                content: contentText, 
-                recipient_name: window.selectedRec, 
-                sender_name: state.user.Full_name 
-            });
-
-            if(error) { 
-                console.error(error); 
-                alert("Error sending message."); 
-            } else { 
-                // CONFETTI BURST
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: ['#6366f1', '#f43f5e', '#fef08a'],
-                    shapes: ['circle', 'square'] // Simple shapes look cleaner
-                });
-
-                alert(content[state.lang].alertSent); 
-                window.selectedRec = null; 
-                state.searchQuery = '';
-                setView('dashboard'); 
-            }
+            const { error } = await db.from('messages').insert({ content: txt, recipient_name: window.selectedRec, sender_name: state.user.Full_name });
+            
+            if(!error) {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#f43f5e', '#fef08a'] });
+                alert(content[state.lang].alertSent);
+                window.selectedRec = null; state.searchQuery = ''; setView('dashboard');
+            } else { alert("Error sending."); }
         }
 
-        // --- UPGRADED PDF GENERATION ---
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
+            const W = doc.internal.pageSize.getWidth();
+            const H = doc.internal.pageSize.getHeight();
 
-            // 1. ADD A DECORATIVE BORDER
-            doc.setDrawColor(79, 70, 229); // Indigo
-            doc.setLineWidth(1);
-            doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Outer border
-            doc.setLineWidth(0.2);
-            doc.rect(7, 7, pageWidth - 14, pageHeight - 14); // Inner thin border
+            // Border
+            doc.setDrawColor(79, 70, 229); doc.setLineWidth(1); doc.rect(5, 5, W-10, H-10);
+            doc.setLineWidth(0.2); doc.rect(7, 7, W-14, H-14);
 
-            // 2. HEADER: CLASS OF 2025
-            doc.setFillColor(79, 70, 229);
-            doc.rect(0, 20, pageWidth, 25, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(24);
-            doc.text("THE APPRECIATION ENVELOPE", pageWidth / 2, 33, { align: "center" });
-            
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "normal");
-            doc.text("Class of 2025 • Memories of Kindness", pageWidth / 2, 40, { align: "center" });
+            // Header
+            doc.setFillColor(79, 70, 229); doc.rect(0, 20, W, 25, 'F');
+            doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(24);
+            doc.text("THE APPRECIATION ENVELOPE", W/2, 33, { align: "center" });
+            doc.setFontSize(12); doc.setFont("helvetica", "normal");
+            doc.text("Class of 2025 • Memories of Kindness", W/2, 40, { align: "center" });
 
-            // 3. RECIPIENT NAME
-            doc.setTextColor(30, 41, 59);
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
+            // Name
+            doc.setTextColor(30, 41, 59); doc.setFontSize(18); doc.setFont("helvetica", "bold");
             doc.text(`For: ${state.user.Full_name}`, 20, 65);
 
-            // 4. THE MESSAGES (STATIONERY STYLE)
-            let y = 80;
-            doc.setFontSize(11);
-            
-            if(state.messages.length === 0) {
-                doc.setFont("helvetica", "italic");
-                doc.text("This envelope is waiting to be filled with kind words...", 20, y);
+            // Content
+            let y = 85; 
+            if(state.messages.length===0) {
+                doc.setFontSize(11); doc.setFont("helvetica", "italic"); doc.text("Waiting for messages...", 20, y);
             } else {
-                state.messages.forEach((msg, i) => {
-                    // Check for new page
-                    if (y > 260) { 
-                        doc.addPage(); 
-                        // Redraw borders on new page
-                        doc.setDrawColor(79, 70, 229);
-                        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
-                        y = 30; 
-                    }
-
-                    // Draw a "Sticky Note" box
-                    doc.setDrawColor(226, 232, 240);
-                    doc.setFillColor(248, 250, 252);
-                    doc.roundedRect(15, y, pageWidth - 30, 20, 2, 2, 'FD');
-                    
-                    // Text inside
-                    doc.setTextColor(51, 65, 85);
-                    doc.setFont("helvetica", "italic");
-                    const splitText = doc.splitTextToSize(`"${msg.content}"`, pageWidth - 40);
-                    doc.text(splitText, 20, y + 12);
-                    
-                    y += 28;
+                state.messages.forEach(m => {
+                    if(y > 250) { doc.addPage(); y=30; }
+                    doc.setDrawColor(200); doc.setFillColor(248, 250, 252);
+                    doc.roundedRect(15, y, W-30, 20, 3, 3, 'FD');
+                    doc.setTextColor(50); doc.setFontSize(10); doc.setFont("helvetica", "italic");
+                    doc.text(doc.splitTextToSize(`"${m.content}"`, W-40), 20, y+8);
+                    y += 25;
                 });
             }
-
-            // 5. FOOTER
-            doc.setTextColor(148, 163, 184);
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "normal");
-            doc.text("Generated by the Class Portal • 100% Anonymous", pageWidth / 2, pageHeight - 15, { align: "center" });
-
-            doc.save(`${state.user.Full_name}_Appreciation_2025.pdf`);
+            doc.save("Certificate.pdf");
         }
 
-        // Initialize
         render();
-
     </script>
 </body>
 </html>
