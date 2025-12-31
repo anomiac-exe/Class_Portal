@@ -199,6 +199,10 @@
                                 <div class="relative z-10">
                                     <i class="fa-solid fa-quote-left text-brand-200 text-2xl mb-2"></i>
                                     <p class="text-slate-700 leading-relaxed font-medium">{{ msg.content }}</p>
+                                    <div class="mt-4 pt-2 border-t border-slate-50 text-xs text-slate-300 flex justify-between">
+                                        <span>From: Anonymous Classmate</span>
+                                        <span>{{ new Date(msg.created_at).toLocaleDateString() }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -247,9 +251,9 @@
         const { createApp, ref, computed, onMounted } = Vue;
         const { createClient } = supabase;
 
-        // Supabase Configuration
+        // --- SUPABASE CONFIGURATION ---
         const SUPABASE_URL = 'https://ijgtdeffemmvuezkkfri.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMTI5MzEsImV4cCI6MjA4MjU4ODkzMX0.x-nO59Smnq2Sk-Q_rVOM3oPuVmur5nTpgwZntJJEFxY'; // Provided Key
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMTI5MzEsImV4cCI6MjA4MjU4ODkzMX0.x-nO59Smnq2Sk-Q_rVOM3oPuVmur5nTpgwZntJJEFxY';
         const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Translations
@@ -378,7 +382,7 @@
                     return name.substring(0, 2).toUpperCase();
                 };
 
-                // Login Logic
+                // Login Logic (Using Students table)
                 const handleLogin = async () => {
                     if (!loginInput.value) return;
                     loading.value = true;
@@ -387,11 +391,12 @@
                     const formattedName = loginInput.value.trim().toUpperCase();
 
                     try {
+                        // NOTE: Using 'Students' (Capital S) as requested
                         const { data, error } = await client
                             .from('Students')
                             .select('*')
                             .ilike('Full_name', formattedName)
-                            .maybeSingle(); // Use maybeSingle to avoid 406 on no result
+                            .maybeSingle(); 
 
                         if (error) throw error;
                         
@@ -413,6 +418,7 @@
                 // Dashboard Data Loading
                 const loadDashboardData = async () => {
                     // 1. Fetch Classmates (exclude self)
+                    // Using 'Students' table
                     const { data: classmates } = await client
                         .from('Students')
                         .select('*')
@@ -422,11 +428,11 @@
                     if (classmates) students.value = classmates;
 
                     // 2. Fetch My Messages
-                    // Assuming 'messages' table has: recipient_id, content, sender_name
+                    // NOTE: Using 'messages' (lowercase m) and 'recipient_name' (string)
                     const { data: msgs } = await client
                         .from('messages')
                         .select('*')
-                        .eq('recipient_id', user.value.id)
+                        .eq('recipient_name', user.value.Full_name) 
                         .order('created_at', { ascending: false });
                     
                     if (msgs) myMessages.value = msgs;
@@ -456,11 +462,12 @@
                     sending.value = true;
 
                     try {
+                        // NOTE: Inserting into 'messages' using 'recipient_name' (string) and 'sender_name'
                         const { error } = await client
                             .from('messages')
                             .insert({
-                                recipient_id: selectedStudent.value.id,
-                                sender_name: user.value.Full_name, // Saved for safety, not shown
+                                recipient_name: selectedStudent.value.Full_name, // Linking by Name string
+                                sender_name: user.value.Full_name, // Saved for safety
                                 content: messageContent.value
                             });
 
@@ -470,7 +477,7 @@
                         closeModal();
                     } catch (err) {
                         console.error("Send Error:", err);
-                        alert("Error sending message.");
+                        alert("Error sending message. Please try again.");
                     } finally {
                         sending.value = false;
                     }
@@ -496,7 +503,7 @@
                         
                         doc.setFontSize(10);
                         doc.setTextColor(100);
-                        doc.text(`Message ${index + 1}`, 20, y);
+                        doc.text(`Message ${index + 1} - ${new Date(msg.created_at).toLocaleDateString()}`, 20, y);
                         
                         y += 7;
                         doc.setFontSize(12);
