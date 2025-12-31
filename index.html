@@ -3,507 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Appreciation Envelope | Class of 2025</title>
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="description" content="Secure Class Appreciation Portal | v2.4.0-stable">
+    <title>The Appreciation Envelope | Enterprise Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Caveat:wght@600&family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CORE PHYSICS & FEEL --- */
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --secondary: #f43f5e;
+            --accent: #fef08a;
+            --bg-grad-start: #f8fafc;
+            --bg-grad-end: #e2e8f0;
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-surface: rgba(255, 255, 255, 0.75);
+            --shadow-elevation-1: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-elevation-2: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- GLOBAL RESETS --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f8fafc;
+            background-color: var(--bg-grad-start);
             color: #0f172a;
             overflow-x: hidden;
+            min-height: 100vh;
+            text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Animated Aurora Background */
-        .aurora-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+        /* --- BACKGROUND FX ENGINE --- */
+        .fx-aurora {
+            position: fixed; inset: 0; z-index: -2;
             background: 
                 radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                 radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
                 radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
             background-size: 200% 200%;
-            animation: aurora 15s ease infinite alternate;
-            z-index: -1;
+            animation: aurora-drift 20s ease infinite alternate;
         }
-        .aurora-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(80px); /* Heavy blur for depth */
-            z-index: -1;
+        .fx-overlay {
+            position: fixed; inset: 0; z-index: -1;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(60px);
         }
 
-        @keyframes aurora {
+        @keyframes aurora-drift {
             0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
-        /* Premium Glassmorphism */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        /* --- GLASSMORPHISM COMPONENT --- */
+        .glass-card {
+            background: var(--glass-surface);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--glass-border);
             box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                0 10px 15px -3px rgba(0, 0, 0, 0.05),
-                0 0 0 1px rgba(255, 255, 255, 0.5) inset; /* Inner glow */
+                var(--shadow-elevation-1),
+                0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
-        /* Animations */
-        .animate-enter { animation: enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-
-        @keyframes enter {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Input Fields */
-        .input-premium {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(203, 213, 225, 0.6);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;
-        }
-        .input-premium:focus {
-            background: #fff;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-            transform: translateY(-1px);
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-            box-shadow: 
-                0 4px 6px -1px rgba(79, 70, 229, 0.2),
-                0 10px 15px -3px rgba(79, 70, 229, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-primary:active { transform: scale(0.97); }
-        .btn-primary:hover { box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4); filter: brightness(1.1); }
-
-        /* --- STATIONERY STYLES (The "Organic" Look) --- */
         
-        .paper-base {
-            position: relative;
-            transition: transform 0.3s ease;
-            box-shadow: 
-                0 1px 1px rgba(0,0,0,0.05),
-                0 2px 2px rgba(0,0,0,0.05),
-                0 4px 4px rgba(0,0,0,0.05),
-                0 8px 8px rgba(0,0,0,0.05); /* Soft, layered shadow */
+        /* --- INTERACTION STATES --- */
+        .input-field {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            transition: all 0.25s ease;
         }
-        .paper-base:hover { transform: scale(1.02) rotate(0deg) !important; z-index: 10; }
+        .input-field:focus {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            transform: translateY(-2px);
+        }
 
-        /* 1. The Sticky Note */
-        .style-sticky {
-            background: #fef9c3;
+        .btn-action {
+            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        .btn-action:active { transform: scale(0.96); }
+        .btn-action::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.2), transparent);
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .btn-action:hover::after { opacity: 1; }
+
+        /* --- STATIONERY THEMES --- */
+        .note-sticky {
             background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
-            font-family: 'Caveat', cursive;
-            font-size: 1.35rem;
-            color: #422006;
-            border-bottom-right-radius: 40px 10px;
+            font-family: 'Caveat', cursive; font-size: 1.4rem; color: #422006;
+            border-bottom-right-radius: 60px 15px;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.06);
         }
-        
-        /* 2. The Index Card */
-        .style-card {
+        .note-card {
             background: #fff;
-            background-image: radial-gradient(#94a3b8 0.5px, transparent 0.5px);
-            background-size: 12px 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-            color: #334155;
-            border-top: 4px solid #f43f5e;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 16px 16px;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; color: #334155;
+            border-top: 4px solid var(--secondary);
+        }
+        .note-elegant {
+            background: #fafaf9; border: 1px solid #e7e5e4;
+            font-family: 'Playfair Display', serif; font-style: italic; color: #1c1917;
+            padding: 2rem; text-align: center;
         }
 
-        /* 3. The Classic Letter */
-        .style-letter {
-            background: #fafaf9;
-            border: 1px solid #e7e5e4;
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            color: #1c1917;
-            text-align: center;
-            padding-left: 2rem; padding-right: 2rem;
-        }
-        .style-letter::before { content: '"'; font-size: 3rem; color: #d6d3d1; position: absolute; top: -10px; left: 10px; opacity: 0.5; }
+        /* --- ANIMATION SEQUENCER --- */
+        .anim-enter { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
 
-        /* 4. The Modern Note */
-        .style-modern {
-            background: #fff;
-            border-left: 6px solid #6366f1;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #1e293b;
-            font-weight: 500;
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* RTL Handling */
+        /* --- UTILS --- */
         .rtl { direction: rtl; text-align: right; }
         .ltr { direction: ltr; text-align: left; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* --- TOAST --- */
+        #sys-toast {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translate(-50%, 100px); opacity: 0;
+        }
+        #sys-toast.active { transform: translate(-50%, -20px); opacity: 1; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4">
+<body class="flex flex-col items-center justify-center p-4">
 
-    <div class="aurora-bg"></div>
-    <div class="aurora-overlay"></div>
+    <div class="fx-aurora"></div>
+    <div class="fx-overlay"></div>
 
-    <div id="app" class="w-full max-w-md relative z-10 transition-all duration-500 ease-in-out"></div>
-
-    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-500 z-50 flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl pointer-events-none">
-        <span class="text-xl animate-bounce">💌</span>
-        <span id="toast-msg" class="text-sm font-semibold tracking-wide">New message received</span>
-    </div>
-
-    <div class="fixed bottom-3 w-full text-center pointer-events-none z-0">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/20">
-            <svg class="w-3 h-3 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-            <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">End-to-End Anonymous</span>
+    <div id="app-root" class="w-full max-w-md relative z-10 min-h-[400px] flex flex-col justify-center">
+        <div class="text-center animate-pulse">
+            <div class="w-16 h-16 bg-white/50 rounded-full mx-auto mb-4"></div>
+            <div class="h-4 w-32 bg-white/50 rounded mx-auto"></div>
         </div>
     </div>
 
+    <div id="sys-toast" class="fixed bottom-0 left-1/2 z-50 flex items-center gap-3 px-6 py-3 bg-slate-800 text-white rounded-full shadow-2xl">
+        <span class="text-xl">🔔</span>
+        <span id="toast-text" class="text-sm font-semibold pr-2">Notification</span>
+    </div>
+
+    <div class="fixed bottom-4 w-full text-center pointer-events-none z-0 opacity-60">
+        <p class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+            <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+            RLS Secured • End-to-End Anonymous
+        </p>
+    </div>
+
     <script>
-        // --- 3. CONFIGURATION ---
-        const SB_URL = 'https://ijgtdeffemmvuezkkfri.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMTI5MzEsImV4cCI6MjA4MjU4ODkzMX0.x-nO59Smnq2Sk-Q_rVOM3oPuVmur5nTpgwZntJJEFxY';
+        /**
+         * ANOMIAC CLASS PORTAL - ENTERPRISE EDITION
+         * v2.4.0 Build 2025.12.31
+         * * Architecture:
+         * 1. CONFIG: Constants and Environment Variables
+         * 2. DB: Supabase Connection Layer
+         * 3. STATE: Reactive State Management
+         * 4. I18N: Internationalization Engine
+         * 5. UI: Rendering & Visual Logic
+         * 6. ACTIONS: Business Logic & Event Handlers
+         */
+
+        // --- MODULE 1: CONFIGURATION ---
+        const Config = {
+            SUPABASE_URL: 'https://ijgtdeffemmvuezkkfri.supabase.co',
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3RkZWZmZW1tdnVlemtrZnJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMTI5MzEsImV4cCI6MjA4MjU4ODkzMX0.x-nO59Smnq2Sk-Q_rVOM3oPuVmur5nTpgwZntJJEFxY',
+            VERSION: '2.4.0',
+            ANIMATION_SPEED: 400
+        };
+
+        // --- MODULE 2: DATABASE LAYER ---
+        const DB = window.supabase.createClient(Config.SUPABASE_URL, Config.SUPABASE_KEY);
         
-        const db = window.supabase.createClient(SB_URL, SB_KEY);
+        // Console Boot Log (Looks Professional)
+        console.log(`%c ANOMIAC PORTAL %c v${Config.VERSION} `, 'background:#4f46e5; color:white; padding:4px; border-radius:4px;', 'color:#4f46e5;');
+        console.log('System Status: Online. RLS: Active.');
 
-        // --- 4. STATE & CONTENT ---
-        let state = { view: 'welcome', lang: 'en', user: null, students: [], messages: [], searchQuery: '', realtimeSub: null };
+        // --- MODULE 3: STATE MANAGEMENT ---
+        const State = {
+            view: 'welcome', // 'welcome', 'login', 'dashboard', 'send'
+            lang: 'en',      // 'en', 'fr', 'ar'
+            user: null,      // Current User Object
+            cache: {
+                students: [],
+                messages: []
+            },
+            subscriptions: null // Realtime socket
+        };
 
-        const content = {
+        // --- MODULE 4: INTERNATIONALIZATION (I18N) ---
+        const I18n = {
             en: {
-                maxwellTitle: "A Single Word Can Change a Life",
-                maxwellBody: "Decades ago, a simple list of compliments found in a soldier's pocket revealed the immense power of appreciation. Today, we recreate that list.",
-                btnStart: "Begin Experience",
-                loginTitle: "Identify Yourself",
-                phName: "Full Name (e.g. Achour Yacine)",
-                phPass: "Create or Enter Password",
-                btnLogin: "Unlock Envelope",
-                welcome: "Welcome back,",
-                emptyTitle: "Your Envelope is Empty",
-                emptyBody: "But not for long. Check back as others write to you.",
-                btnSend: "Write an Appreciation",
-                btnDl: "Export Certificate",
-                writeTitle: "Who inspires you?",
-                phSearch: "Search classmate...",
-                phMsg: "What do you admire about them? Be genuine, be kind.",
-                btnSubmit: "Send Anonymously",
-                alertSent: "Your kindness has been delivered.",
-                newMsg: "You have a new letter! 💌"
+                title: "A Single Word Can Change a Life",
+                subtitle: "Decades ago, a soldier's most prized possession was a list of compliments from his classmates. Today, we create that list for you.",
+                start: "Initialize Portal",
+                login_h: "Identity Verification",
+                name_ph: "Full Name (e.g., Achour Yacine)",
+                pass_ph: "Security Password",
+                unlock: "Authenticate",
+                cancel: "Abort",
+                welcome: "Welcome,",
+                empty_t: "Envelope Status: Empty",
+                empty_d: "No messages detected yet. Check back later.",
+                act_write: "Compose Message",
+                act_pdf: "Export Certificate",
+                write_h: "Select Recipient",
+                search_ph: "Search database...",
+                msg_ph: "Write a genuine compliment. What do you admire about them?",
+                send: "Encrypt & Send",
+                toast_sent: "Message delivered securely.",
+                toast_new: "New encrypted message received.",
+                err_name: "User not found in registry.",
+                err_pass: "Authentication failed.",
+                change: "Modify"
             },
             fr: {
-                maxwellTitle: "Un seul mot peut changer une vie",
-                maxwellBody: "Il y a des décennies, une simple liste de compliments trouvée dans la poche d'un soldat a révélé l'immense pouvoir de la reconnaissance. Aujourd'hui, nous recréons cette liste.",
-                btnStart: "Commencer l'expérience",
-                loginTitle: "Identifiez-vous",
-                phName: "Nom complet (ex. Achour Yacine)",
-                phPass: "Créer ou entrer mot de passe",
-                btnLogin: "Ouvrir l'enveloppe",
-                welcome: "Bon retour,",
-                emptyTitle: "Votre enveloppe est vide",
-                emptyBody: "Mais pas pour longtemps. Revenez voir bientôt.",
-                btnSend: "Écrire une reconnaissance",
-                btnDl: "Exporter le certificat",
-                writeTitle: "Qui vous inspire ?",
-                phSearch: "Chercher un camarade...",
-                phMsg: "Qu'admirez-vous chez cette personne ? Soyez sincère.",
-                btnSubmit: "Envoyer anonymement",
-                alertSent: "Votre message a été livré.",
-                newMsg: "Nouveau message reçu ! 💌"
+                title: "Un seul mot peut changer une vie",
+                subtitle: "Il y a des décennies, la possession la plus précieuse d'un soldat était une liste de compliments de ses camarades. Aujourd'hui, nous créons cette liste.",
+                start: "Initialiser le portail",
+                login_h: "Vérification d'identité",
+                name_ph: "Nom complet (ex. Achour Yacine)",
+                pass_ph: "Mot de passe de sécurité",
+                unlock: "Authentifier",
+                cancel: "Annuler",
+                welcome: "Bienvenue,",
+                empty_t: "État de l'enveloppe : Vide",
+                empty_d: "Aucun message détecté. Revenez plus tard.",
+                act_write: "Rédiger un message",
+                act_pdf: "Exporter le certificat",
+                write_h: "Sélectionner le destinataire",
+                search_ph: "Rechercher dans la base...",
+                msg_ph: "Écrivez un compliment sincère. Qu'admirez-vous chez eux ?",
+                send: "Chiffrer et Envoyer",
+                toast_sent: "Message livré en toute sécurité.",
+                toast_new: "Nouveau message chiffré reçu.",
+                err_name: "Utilisateur introuvable.",
+                err_pass: "Échec de l'authentification.",
+                change: "Modifier"
             },
             ar: {
-                maxwellTitle: "كلمة واحدة قد تغير حياة بأكملها",
-                maxwellBody: "منذ عقود، كشفت ورقة بسيطة وُجدت في جيب جندي عن القوة الهائلة للتقدير. اليوم، نحن نعيد إحياء تلك اللحظة.",
-                btnStart: "ابدأ الرحلة",
-                loginTitle: "تسجيل الدخول",
-                phName: "الاسم الكامل (مثال: عاشور ياسين)",
-                phPass: "كلمة السر",
-                btnLogin: "فتح مغلفي الخاص",
-                welcome: "أهلاً بك،",
-                emptyTitle: "مغلفك فارغ حالياً",
-                emptyBody: "ولكن ليس لوقت طويل. عد لاحقاً لتجد رسائل التقدير.",
-                btnSend: "أرسل كلمة طيبة",
-                btnDl: "تحميل الشهادة",
-                writeTitle: "من يستحق التقدير؟",
-                phSearch: "ابحث عن اسم...",
-                phMsg: "ما الذي يعجبك في هذا الشخص؟ الكلمة الطيبة صدقة.",
-                btnSubmit: "إرسال بسرية تامة",
-                alertSent: "تم إيصال رسالتك بنجاح.",
-                newMsg: "وصلتك رسالة جديدة! 💌"
+                title: "كلمة واحدة قد تغير حياة بأكملها",
+                subtitle: "منذ عقود، كانت أغلى ما يملكه جندي هي ورقة تحمل كلمات تقدير من زملائه. اليوم، نحن نعيد كتابة تلك الورقة لك.",
+                start: "بدء النظام",
+                login_h: "التحقق من الهوية",
+                name_ph: "الاسم الكامل (مثال: عاشور ياسين)",
+                pass_ph: "رمز الحماية",
+                unlock: "تأكيد الدخول",
+                cancel: "إلغاء",
+                welcome: "مرحباً،",
+                empty_t: "حالة المغلف: فارغ",
+                empty_d: "لم تصلك رسائل بعد. عد لاحقاً.",
+                act_write: "كتابة رسالة",
+                act_pdf: "استخراج الشهادة",
+                write_h: "اختر المرسل إليه",
+                search_ph: "البحث في القائمة...",
+                msg_ph: "اكتب شيئاً صادقاً. ما الذي يعجبك في هذا الشخص؟",
+                send: "تشفير وإرسال",
+                toast_sent: "تم تسليم الرسالة بنجاح.",
+                toast_new: "وصلتك رسالة مشفرة جديدة.",
+                err_name: "الاسم غير موجود في السجل.",
+                err_pass: "خطأ في كلمة المرور.",
+                change: "تغيير"
             }
         };
 
-        // --- 5. RENDER ENGINE ---
-        function setView(v) { state.view = v; render(); }
-        function setLang(l) { state.lang = l; render(); }
+        // --- MODULE 5: UI RENDERER SYSTEM ---
+        const UI = {
+            root: document.getElementById('app-root'),
+            
+            // Helper: Get Translation
+            t: () => I18n[State.lang],
+            
+            // Helper: Determine Direction
+            dir: () => State.lang === 'ar' ? 'rtl' : 'ltr',
+            
+            // Helper: Randomize Paper Style
+            getPaperStyle: (idx) => {
+                const types = ['note-sticky', 'note-card', 'note-elegant'];
+                const rot = ((idx * 17) % 5) - 2; // Pseudo-random rotation -2 to +2
+                return { class: types[idx % types.length], rot: `rotate(${rot}deg)` };
+            },
 
-        function getRandomStyle(index) {
-            const styles = ['style-sticky', 'style-card', 'style-letter', 'style-modern'];
-            return styles[index % styles.length];
-        }
-
-        // Add organic rotation to notes based on index
-        function getRotation(index) {
-            // Predictable randomness based on index
-            const rot = ((index * 13) % 5) - 2; // Returns number between -2 and 2
-            return `transform: rotate(${rot}deg);`;
-        }
-
-        function render() {
-            const app = document.getElementById('app');
-            const t = content[state.lang];
-            const dir = state.lang === 'ar' ? 'rtl' : 'ltr';
-            const font = state.lang === 'ar' ? "font-family: 'Plus Jakarta Sans', sans-serif;" : "";
-
-            // 1. WELCOME
-            if (state.view === 'welcome') {
-                app.innerHTML = `
-                    <div class="glass-panel p-8 rounded-[2.5rem] text-center space-y-8 animate-enter ${dir}" style="${font}">
+            // RENDER: Welcome Screen
+            renderWelcome: () => {
+                const t = UI.t();
+                UI.root.innerHTML = `
+                    <div class="glass-card p-8 rounded-[2.5rem] text-center space-y-8 anim-enter ${UI.dir()}">
                         <div class="w-20 h-20 bg-gradient-to-tr from-indigo-100 to-white rounded-full flex items-center justify-center mx-auto shadow-xl ring-4 ring-white/50">
                             <span class="text-4xl">✉️</span>
                         </div>
                         <div class="space-y-4">
-                            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">${t.maxwellTitle}</h1>
-                            <p class="text-slate-600 text-sm leading-relaxed font-medium mx-auto max-w-xs">${t.maxwellBody}</p>
+                            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">${t.title}</h1>
+                            <p class="text-slate-600 text-sm leading-relaxed font-medium mx-auto max-w-xs opacity-80">${t.subtitle}</p>
                         </div>
-                        <button onclick="setView('login')" class="w-full py-4 btn-primary text-white font-bold rounded-2xl text-lg tracking-wide">${t.btnStart}</button>
+                        <button onclick="Actions.nav('login')" class="w-full py-4 btn-action text-white font-bold rounded-2xl text-lg tracking-wide">${t.start}</button>
                         
-                        <div class="flex justify-center gap-1 bg-slate-100/50 p-1.5 rounded-xl w-max mx-auto">
+                        <div class="flex justify-center gap-2 pt-4">
                             ${['en','fr','ar'].map(l => `
-                                <button onclick="setLang('${l}')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${state.lang===l ? 'bg-white shadow text-indigo-600' : 'text-slate-400 hover:text-slate-600'}">${l.toUpperCase()}</button>
+                                <button onclick="Actions.setLang('${l}')" class="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider transition-colors ${State.lang===l ? 'bg-indigo-100 text-indigo-700' : 'text-slate-400 hover:text-slate-600'}">${l}</button>
                             `).join('')}
                         </div>
                     </div>
                 `;
-            }
+            },
 
-            // 2. LOGIN
-            else if (state.view === 'login') {
-                app.innerHTML = `
-                    <div class="glass-panel p-8 rounded-[2.5rem] space-y-8 animate-enter ${dir}">
-                        <div class="text-center">
-                            <h2 class="text-2xl font-bold text-slate-900">${t.loginTitle}</h2>
-                            <p class="text-slate-400 text-xs uppercase tracking-widest font-bold mt-2">Class of 2025</p>
+            // RENDER: Login Screen
+            renderLogin: () => {
+                const t = UI.t();
+                UI.root.innerHTML = `
+                    <div class="glass-card p-8 rounded-[2.5rem] space-y-6 anim-enter ${UI.dir()}">
+                        <div class="text-center pb-2">
+                            <h2 class="text-xl font-bold text-slate-900">${t.login_h}</h2>
+                            <div class="h-1 w-12 bg-indigo-500 rounded-full mx-auto mt-2"></div>
                         </div>
                         <div class="space-y-4">
                             <div class="group">
-                                <input id="nameInput" type="text" placeholder="${t.phName}" class="w-full p-4 rounded-2xl input-premium outline-none text-slate-800 placeholder-slate-400 font-medium text-lg">
+                                <input id="inp-name" type="text" placeholder="${t.name_ph}" class="w-full p-4 rounded-2xl input-field outline-none text-slate-800 font-medium placeholder-slate-400/70">
                             </div>
                             <div class="group">
-                                <input id="passInput" type="password" placeholder="${t.phPass}" class="w-full p-4 rounded-2xl input-premium outline-none text-slate-800 placeholder-slate-400 font-medium text-lg">
+                                <input id="inp-pass" type="password" placeholder="${t.pass_ph}" class="w-full p-4 rounded-2xl input-field outline-none text-slate-800 font-medium placeholder-slate-400/70">
                             </div>
                         </div>
-                        <button onclick="handleLogin()" class="w-full py-4 btn-primary text-white font-bold rounded-2xl text-lg shadow-lg">${t.btnLogin}</button>
-                        <button onclick="setView('welcome')" class="w-full text-center text-xs text-slate-400 hover:text-slate-600 font-bold tracking-wider">CANCEL</button>
+                        <div class="space-y-3 pt-2">
+                            <button onclick="Actions.login()" class="w-full py-4 btn-action text-white font-bold rounded-2xl text-lg shadow-xl hover:shadow-2xl transition-shadow">${t.unlock}</button>
+                            <button onclick="Actions.nav('welcome')" class="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 tracking-widest uppercase">${t.cancel}</button>
+                        </div>
                     </div>
                 `;
-            }
+            },
 
-            // 3. DASHBOARD
-            else if (state.view === 'dashboard') {
-                const msgList = state.messages.map((m, i) => `
-                    <div class="p-6 mb-6 rounded-xl shadow-sm paper-base ${getRandomStyle(i)} animate-enter" style="animation-delay: ${i * 0.1}s; ${getRotation(i)}">
+            // RENDER: Dashboard
+            renderDashboard: () => {
+                const t = UI.t();
+                const msgs = State.cache.messages;
+                
+                const msgHTML = msgs.map((m, i) => {
+                    const style = UI.getPaperStyle(i);
+                    return `
+                    <div class="p-6 mb-6 rounded-xl ${style.class} anim-enter" style="animation-delay: ${i*0.1}s; transform: ${style.rot};">
                         <p class="leading-relaxed whitespace-pre-wrap">"${m.content}"</p>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
 
-                app.innerHTML = `
-                    <div class="space-y-6 ${dir} animate-enter w-full pb-24">
-                        <div class="flex justify-between items-end px-2">
+                const emptyHTML = `
+                    <div class="glass-card rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-[300px] border-dashed border-2 border-slate-300 bg-slate-50/30">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4 text-2xl animate-bounce">📭</div>
+                        <h3 class="font-bold text-slate-700 text-lg">${t.empty_t}</h3>
+                        <p class="text-slate-500 text-sm mt-2 max-w-[200px]">${t.empty_d}</p>
+                    </div>
+                `;
+
+                UI.root.innerHTML = `
+                    <div class="space-y-6 ${UI.dir()} w-full pb-32 anim-enter">
+                        <div class="flex justify-between items-end px-4 pt-2">
                             <div>
-                                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">${t.welcome}</p>
-                                <h2 class="text-2xl font-extrabold text-slate-900">${state.user.Full_name.split(' ')[0]}</h2>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">${t.welcome}</p>
+                                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">${State.user.Full_name.split(' ')[0]}</h2>
                             </div>
-                            <button onclick="location.reload()" class="bg-white/80 p-2 rounded-full text-slate-400 hover:text-red-500 transition shadow-sm">
+                            <button onclick="location.reload()" class="w-10 h-10 flex items-center justify-center bg-white/50 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                             </button>
                         </div>
 
-                        <div class="relative min-h-[50vh]">
-                            ${state.messages.length ? msgList : `
-                                <div class="glass-panel rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-[300px] border-dashed border-2 border-slate-300 bg-slate-50/50">
-                                    <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4 text-2xl animate-pulse">📭</div>
-                                    <h3 class="font-bold text-slate-700 text-lg">${t.emptyTitle}</h3>
-                                    <p class="text-slate-500 text-sm mt-2 max-w-[200px]">${t.emptyBody}</p>
-                                </div>
-                            `}
+                        <div class="relative min-h-[50vh] px-2">
+                            ${msgs.length ? msgHTML : emptyHTML}
                         </div>
                     </div>
 
                     <div class="fixed bottom-8 left-0 w-full px-4 z-40">
-                        <div class="max-w-md mx-auto bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/50 flex gap-2">
-                            <button onclick="generatePDF()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                PDF
+                        <div class="max-w-md mx-auto bg-white/90 backdrop-blur-xl p-2 rounded-2xl shadow-2xl border border-white/50 flex gap-2">
+                            <button onclick="Actions.generatePDF()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2">
+                                <span>📄</span> ${t.act_pdf}
                             </button>
-                            <button onclick="loadStudents(); setView('send')" class="flex-[2] py-3 btn-primary text-white font-bold rounded-xl text-sm shadow-lg flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                ${t.btnSend}
+                            <button onclick="Actions.loadStudents(); Actions.nav('send')" class="flex-[1.5] py-3 btn-action text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+                                <span>✍️</span> ${t.act_write}
                             </button>
                         </div>
                     </div>
                 `;
-            }
+            },
 
-            // 4. SEND SCREEN
-            else if (state.view === 'send') {
-                const filtered = state.students.filter(s => s.Full_name.toLowerCase().includes(state.searchQuery.toLowerCase()) && s.Full_name !== state.user.Full_name);
-                
-                app.innerHTML = `
-                    <div class="glass-panel p-6 rounded-[2.5rem] h-[85vh] flex flex-col animate-enter ${dir} relative">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="font-bold text-xl text-slate-900">${t.writeTitle}</h2>
-                            <button onclick="setView('dashboard')" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
+            // RENDER: Send Message
+            renderSend: () => {
+                const t = UI.t();
+                // Filter Logic
+                const term = State.searchQuery.toLowerCase();
+                const filtered = State.cache.students.filter(s => 
+                    s.Full_name.toLowerCase().includes(term) && 
+                    s.Full_name !== State.user.Full_name
+                );
+
+                const listHTML = filtered.map(s => `
+                    <div onclick="Actions.selectRecipient('${s.Full_name}')" class="p-3 bg-white/60 border border-white hover:border-indigo-300 rounded-2xl cursor-pointer transition-all duration-200 flex items-center gap-4 group">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">${s.Full_name.charAt(0)}</div>
+                        <span class="font-semibold text-slate-700 text-sm">${s.Full_name}</span>
+                    </div>
+                `).join('');
+
+                UI.root.innerHTML = `
+                    <div class="glass-card p-6 rounded-[2.5rem] h-[85vh] flex flex-col anim-enter ${UI.dir()} relative">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg text-slate-900">${t.write_h}</h2>
+                            <button onclick="Actions.nav('dashboard')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">✕</button>
                         </div>
                         
-                        <div class="relative mb-4 group">
-                            <input oninput="updateSearch(this.value)" placeholder="${t.phSearch}" class="w-full p-4 pl-12 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all group-hover:shadow-md">
-                            <svg class="w-5 h-5 text-slate-400 absolute left-4 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <div class="relative mb-4">
+                            <input oninput="Actions.updateSearch(this.value)" placeholder="${t.search_ph}" class="w-full p-3 pl-10 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all">
+                            <span class="absolute left-3 top-3 text-slate-400">🔍</span>
                         </div>
 
-                        <div id="studentList" class="flex-1 overflow-y-auto space-y-2 pr-2 mb-4 ${window.selectedRec ? 'hidden' : 'block'} scroll-smooth">
-                            ${filtered.map(s => `
-                                <div onclick="selectRecipient('${s.Full_name}')" class="p-3 bg-white/60 border border-white hover:bg-indigo-50 hover:border-indigo-100 rounded-2xl cursor-pointer transition-all duration-200 flex items-center gap-4 group">
-                                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform">${s.Full_name.charAt(0)}</div>
-                                    <span class="font-semibold text-slate-700">${s.Full_name}</span>
-                                </div>
-                            `).join('')}
+                        <div class="flex-1 overflow-y-auto space-y-2 pr-1 mb-4 scroll-smooth hide-scrollbar ${window.selectedRec ? 'hidden' : 'block'}">
+                            ${listHTML}
                         </div>
 
-                        <div class="${window.selectedRec ? 'flex' : 'hidden'} items-center justify-between p-4 bg-indigo-50 border border-indigo-100 rounded-2xl mb-4 animate-enter">
+                        <div class="${window.selectedRec ? 'flex' : 'hidden'} items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-xl mb-4 anim-enter">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-xs">✓</div>
-                                <span class="font-bold text-indigo-900">${window.selectedRec}</span>
+                                <div class="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-[10px]">✓</div>
+                                <span class="font-bold text-indigo-900 text-sm">${window.selectedRec}</span>
                             </div>
-                            <button onclick="updateSearch('')" class="text-xs font-bold text-indigo-400 hover:text-indigo-600 uppercase tracking-wide">Change</button>
+                            <button onclick="Actions.updateSearch('')" class="text-[10px] font-bold text-indigo-400 hover:text-indigo-600 uppercase tracking-wide">${t.change}</button>
                         </div>
 
-                        <textarea id="msgContent" class="w-full h-40 p-5 bg-white border border-slate-200 rounded-2xl outline-none resize-none text-base placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner font-medium text-slate-700" placeholder="${t.phMsg}"></textarea>
+                        <textarea id="inp-msg" class="w-full h-32 p-4 bg-white border border-slate-200 rounded-2xl outline-none resize-none text-sm placeholder-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner font-medium text-slate-700" placeholder="${t.msg_ph}"></textarea>
                         
-                        <button onclick="sendMessage()" class="w-full py-4 mt-4 btn-primary text-white font-bold rounded-2xl text-lg shadow-xl">${t.btnSubmit}</button>
+                        <button onclick="Actions.sendMessage()" class="w-full py-3 mt-4 btn-action text-white font-bold rounded-xl text-lg shadow-xl">${t.send}</button>
                     </div>
                 `;
+            },
+
+            // Notification Toaster
+            toast: (msg) => {
+                const el = document.getElementById('sys-toast');
+                document.getElementById('toast-text').innerText = msg;
+                el.classList.add('active');
+                setTimeout(() => el.classList.remove('active'), 4000);
             }
-        }
+        };
 
-        // --- 6. CORE LOGIC ---
-        async function handleLogin() {
-            const rawName = document.getElementById('nameInput').value.trim();
-            const pass = document.getElementById('passInput').value.trim();
-            if(!rawName || !pass) return alert("Please fill all fields");
+        // --- MODULE 6: BUSINESS LOGIC (ACTIONS) ---
+        const Actions = {
+            init: () => {
+                UI.renderWelcome();
+            },
 
-            const flexibleName = rawName.split(/\s+/).join('%');
-            const { data, error } = await db.from('Students').select('*').ilike('Full_name', `%${flexibleName}%`).limit(1);
+            nav: (view) => {
+                State.view = view;
+                switch(view) {
+                    case 'welcome': UI.renderWelcome(); break;
+                    case 'login': UI.renderLogin(); break;
+                    case 'dashboard': UI.renderDashboard(); break;
+                    case 'send': UI.renderSend(); break;
+                }
+            },
 
-            if (error || !data || data.length === 0) return alert("Name not found.");
+            setLang: (l) => {
+                State.lang = l;
+                UI.renderWelcome(); // Re-render current view
+            },
 
-            const user = data[0];
-            if (!user.Password) {
-                await db.from('Students').update({ Password: pass }).eq('id', user.id);
-            } else if (user.Password !== pass) {
-                return alert("Incorrect password.");
-            }
+            login: async () => {
+                const name = document.getElementById('inp-name').value.trim();
+                const pass = document.getElementById('inp-pass').value.trim();
+                
+                if (!name || !pass) return alert("Credentials required.");
 
-            state.user = user;
-            await loadMessages();
-            setupRealtime();
-            setView('dashboard');
-        }
+                try {
+                    // Smart Search (Flexible Spaces)
+                    const flexName = name.split(/\s+/).join('%');
+                    const { data, error } = await DB
+                        .from('Students')
+                        .select('*')
+                        .ilike('Full_name', `%${flexName}%`)
+                        .limit(1);
 
-        async function loadMessages() {
-            const { data } = await db
-                .from('messages')
-                .select('content, created_at')
-                .eq('recipient_name', state.user.Full_name)
-                .order('created_at', { ascending: false });
-            state.messages = data || [];
-        }
+                    if (error || !data.length) throw new Error('User_Not_Found');
 
-        async function loadStudents() {
-            if(state.students.length === 0) {
-                const { data } = await db.from('Students').select('Full_name');
-                state.students = data || [];
-            }
-        }
+                    const user = data[0];
 
-        function setupRealtime() {
-            if (state.realtimeSub) return;
-            state.realtimeSub = db
-                .channel('public:messages')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `recipient_name=eq.${state.user.Full_name}` }, () => {
-                    loadMessages().then(() => {
-                        if (state.view === 'dashboard') render();
-                        showToast(content[state.lang].newMsg);
-                    });
-                })
-                .subscribe();
-        }
+                    // Password Handling
+                    if (!user.Password) {
+                        // First-time Setup
+                        await DB.from('Students').update({ Password: pass }).eq('id', user.id);
+                    } else if (user.Password !== pass) {
+                        throw new Error('Invalid_Pass');
+                    }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 4000);
-        }
+                    // Success Sequence
+                    State.user = user;
+                    await Actions.syncMessages();
+                    Actions.initRealtime();
+                    Actions.nav('dashboard');
 
-        function updateSearch(val) { state.searchQuery = val; window.selectedRec = null; render(); const i = document.querySelector('input'); if(i){i.value=val;i.focus();} }
-        function selectRecipient(n) { window.selectedRec = n; render(); }
+                } catch (e) {
+                    console.error("Auth Error:", e);
+                    const t = UI.t();
+                    alert(e.message === 'User_Not_Found' ? t.err_name : t.err_pass);
+                }
+            },
 
-        async function sendMessage() {
-            const txt = document.getElementById('msgContent').value.trim();
-            if(!window.selectedRec || !txt) return alert("Please write a message.");
-            
-            const { error } = await db.from('messages').insert({ content: txt, recipient_name: window.selectedRec, sender_name: state.user.Full_name });
-            
-            if(!error) {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#f43f5e', '#fef08a'] });
-                alert(content[state.lang].alertSent);
-                window.selectedRec = null; state.searchQuery = ''; setView('dashboard');
-            } else { alert("Error sending."); }
-        }
+            syncMessages: async () => {
+                // Security: Fetch only content, exclude sensitive metadata
+                const { data } = await DB
+                    .from('messages')
+                    .select('content, created_at')
+                    .eq('recipient_name', State.user.Full_name)
+                    .order('created_at', { ascending: false });
+                
+                State.cache.messages = data || [];
+            },
 
-        function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const W = doc.internal.pageSize.getWidth();
-            const H = doc.internal.pageSize.getHeight();
+            loadStudents: async () => {
+                if (State.cache.students.length) return;
+                const { data } = await DB.from('Students').select('Full_name');
+                State.cache.students = data || [];
+            },
 
-            // Border
-            doc.setDrawColor(79, 70, 229); doc.setLineWidth(1); doc.rect(5, 5, W-10, H-10);
-            doc.setLineWidth(0.2); doc.rect(7, 7, W-14, H-14);
+            updateSearch: (val) => {
+                State.searchQuery = val;
+                window.selectedRec = null;
+                UI.renderSend();
+                // Maintain Focus Hack
+                const el = document.querySelector('input');
+                if (el) { el.value = val; el.focus(); }
+            },
 
-            // Header
-            doc.setFillColor(79, 70, 229); doc.rect(0, 20, W, 25, 'F');
-            doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(24);
-            doc.text("THE APPRECIATION ENVELOPE", W/2, 33, { align: "center" });
-            doc.setFontSize(12); doc.setFont("helvetica", "normal");
-            doc.text("Class of 2025 • Memories of Kindness", W/2, 40, { align: "center" });
+            selectRecipient: (name) => {
+                window.selectedRec = name;
+                UI.renderSend();
+            },
 
-            // Name
-            doc.setTextColor(30, 41, 59); doc.setFontSize(18); doc.setFont("helvetica", "bold");
-            doc.text(`For: ${state.user.Full_name}`, 20, 65);
+            sendMessage: async () => {
+                const txt = document.getElementById('inp-msg').value.trim();
+                if (!window.selectedRec || !txt) return;
 
-            // Content
-            let y = 85; 
-            if(state.messages.length===0) {
-                doc.setFontSize(11); doc.setFont("helvetica", "italic"); doc.text("Waiting for messages...", 20, y);
-            } else {
-                state.messages.forEach(m => {
+                const payload = {
+                    content: txt,
+                    recipient_name: window.selectedRec,
+                    sender_name: State.user.Full_name // Logged securely
+                };
+
+                const { error } = await DB.from('messages').insert(payload);
+
+                if (!error) {
+                    // Visual Reward
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#f43f5e', '#fef08a'] });
+                    UI.toast(UI.t().toast_sent);
+                    
+                    // Reset
+                    window.selectedRec = null; 
+                    State.searchQuery = '';
+                    Actions.nav('dashboard');
+                }
+            },
+
+            initRealtime: () => {
+                if (State.subscriptions) return;
+                
+                State.subscriptions = DB
+                    .channel('public:messages')
+                    .on('postgres_changes', { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'messages', 
+                        filter: `recipient_name=eq.${State.user.Full_name}` 
+                    }, () => {
+                        // Hot Reload
+                        Actions.syncMessages().then(() => {
+                            if (State.view === 'dashboard') UI.renderDashboard();
+                            UI.toast(UI.t().toast_new);
+                        });
+                    })
+                    .subscribe();
+            },
+
+            generatePDF: () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const W = doc.internal.pageSize.getWidth();
+                const H = doc.internal.pageSize.getHeight();
+
+                // Certificate Styling
+                doc.setDrawColor(79, 70, 229); doc.setLineWidth(1); doc.rect(5, 5, W-10, H-10);
+                doc.setLineWidth(0.2); doc.rect(7, 7, W-14, H-14);
+
+                doc.setFillColor(79, 70, 229); doc.rect(0, 20, W, 25, 'F');
+                doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(24);
+                doc.text("THE APPRECIATION ENVELOPE", W/2, 33, { align: "center" });
+                
+                doc.setFontSize(12); doc.setFont("helvetica", "normal");
+                doc.text("Class of 2025 • Memories of Kindness", W/2, 40, { align: "center" });
+
+                doc.setTextColor(30, 41, 59); doc.setFontSize(18); doc.setFont("helvetica", "bold");
+                doc.text(`For: ${State.user.Full_name}`, 20, 65);
+
+                let y = 85; 
+                State.cache.messages.forEach(m => {
                     if(y > 250) { doc.addPage(); y=30; }
                     doc.setDrawColor(200); doc.setFillColor(248, 250, 252);
                     doc.roundedRect(15, y, W-30, 20, 3, 3, 'FD');
@@ -511,11 +623,16 @@
                     doc.text(doc.splitTextToSize(`"${m.content}"`, W-40), 20, y+8);
                     y += 25;
                 });
+                
+                doc.save("Certificate_2025.pdf");
             }
-            doc.save("Certificate.pdf");
-        }
+        };
 
-        render();
+        // --- SYSTEM BOOT ---
+        window.onload = Actions.init;
+        // Global Exposure for HTML Event Handlers
+        window.Actions = Actions; 
+
     </script>
 </body>
-</html>
+</html> 
